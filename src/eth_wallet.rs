@@ -100,7 +100,12 @@ pub fn create_eth_transaction(to: Address, eth_value: f64) -> TransactionParamet
         ..Default::default()
     }
 }
-
+pub fn get_secret_key_from_str(key:&str) -> Result<SecretKey> {
+    let key_bytes = hex::decode(key)  // Convert hex string to raw bytes
+        .map_err(|_| anyhow::anyhow!("Failed to decode private key from hex"))?;
+    let key = SecretKey::from_slice(&key_bytes)?;
+    Ok(key)
+}
 pub async fn sign_and_send(
     web3: &Web3<web3::transports::WebSocket>,
     transaction: TransactionParameters,
@@ -128,5 +133,14 @@ pub fn file2wallet(path:&str)->Result<Wallet>{
     wallet = serde_json::from_reader(buff)?;
     Ok(wallet)
 }
-
-// pub fn write_to_file()
+use std::time::Duration;
+use std::thread::sleep;
+pub async fn get_recipt(web3_con:&Web3<WebSocket>,hash:H256)->Result<web3::types::TransactionReceipt>{
+    let receipt = loop {
+        if let Some(receipt) = web3_con.eth().transaction_receipt(hash).await? {
+            break receipt;
+        }
+        sleep(Duration::from_secs(1));
+    };
+    Ok(receipt)
+}
