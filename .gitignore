@@ -1,4 +1,4 @@
 /target
-/.env
-/crypto_wallet.json
-/wallet.json
+.env
+crypto_wallet.json
+wallet.json
